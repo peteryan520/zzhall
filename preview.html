@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>中正會館｜營運儀表板</title>
+  <style>
+    :root {
+      --bg: #f5f1eb;
+      --bg-soft: #fbf8f4;
+      --card: rgba(255,255,255,0.9);
+      --text: #2f241d;
+      --subtext: #6f5d52;
+      --line: rgba(124, 96, 78, 0.16);
+      --accent: #7c604e;
+      --accent-dark: #5f4738;
+      --shadow: 0 12px 30px rgba(74, 48, 31, 0.08);
+      --radius: 22px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+      background:
+        radial-gradient(circle at top right, rgba(124,96,78,0.08), transparent 28%),
+        linear-gradient(180deg, #f9f5f0 0%, var(--bg) 100%);
+      color: var(--text);
+    }
+
+    .wrap {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, rgba(124,96,78,0.96), rgba(95,71,56,0.94));
+      color: #fff;
+      border-radius: 28px;
+      padding: 28px;
+      box-shadow: var(--shadow);
+      margin-bottom: 22px;
+    }
+
+    .hero-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .hero h1 {
+      margin: 0;
+      font-size: 32px;
+      line-height: 1.2;
+      letter-spacing: 0.5px;
+    }
+
+    .hero p {
+      margin: 8px 0 0;
+      color: rgba(255,255,255,0.88);
+      font-size: 15px;
+      line-height: 1.7;
+    }
+
+    .hero-tag {
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.14);
+      backdrop-filter: blur(6px);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .panel {
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,0.65);
+      backdrop-filter: blur(10px);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .filters {
+      padding: 18px;
+      margin-bottom: 18px;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      align-items: end;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .field label {
+      font-size: 13px;
+      color: var(--subtext);
+      font-weight: 600;
+    }
+
+    .field input,
+    .field select,
+    .btn {
+      width: 100%;
+      height: 44px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: #fff;
+      padding: 0 14px;
+      font-size: 14px;
+      color: var(--text);
+      outline: none;
+    }
+
+    .btn {
+      cursor: pointer;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      font-weight: 700;
+      transition: 0.2s ease;
+    }
+
+    .btn:hover {
+      background: var(--accent-dark);
+      transform: translateY(-1px);
+    }
+
+    .summary-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin: 0 0 16px;
+    }
+
+    .summary-title h2,
+    .section-title {
+      margin: 0;
+      font-size: 22px;
+      color: var(--text);
+    }
+
+    .summary-title span {
+      color: var(--subtext);
+      font-size: 13px;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .card {
+      padding: 18px;
+    }
+
+    .card .label {
+      font-size: 13px;
+      color: var(--subtext);
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+
+    .card .value {
+      font-size: 34px;
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+
+    .card .desc {
+      font-size: 13px;
+      color: var(--subtext);
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    .chart-box,
+    .stats-box,
+    .table-box {
+      padding: 20px;
+    }
+
+    .chart-box canvas {
+      width: 100%;
+      height: 320px;
+      display: block;
+    }
+
+    .stats-list {
+      display: grid;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .stat-row {
+      padding: 14px 16px;
+      background: var(--bg-soft);
+      border-radius: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .stat-row .name {
+      font-size: 14px;
+      color: var(--subtext);
+      font-weight: 600;
+    }
+
+    .stat-row .num {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .table-wrap {
+      overflow: auto;
+      margin-top: 16px;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 860px;
+    }
+
+    thead {
+      background: #f3ece4;
+    }
+
+    th,
+    td {
+      padding: 14px 12px;
+      text-align: center;
+      border-bottom: 1px solid #efe4d8;
+      font-size: 14px;
+    }
+
+    th {
+      color: var(--text);
+      font-weight: 800;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    td {
+      color: #4b3b31;
+    }
+
+    .empty {
+      padding: 42px 18px;
+      text-align: center;
+      color: var(--subtext);
+    }
+
+    .footer-note {
+      margin-top: 10px;
+      font-size: 12px;
+      color: var(--subtext);
+      text-align: right;
+    }
+
+    @media (max-width: 1080px) {
+      .filters,
+      .cards {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 680px) {
+      .wrap {
+        padding: 14px;
+      }
+
+      .hero {
+        padding: 20px;
+        border-radius: 22px;
+      }
+
+      .hero h1 {
+        font-size: 24px;
+      }
+
+      .filters,
+      .cards {
+        grid-template-columns: 1fr;
+      }
+
+      .summary-title h2,
+      .section-title {
+        font-size: 18px;
+      }
+
+      .card .value {
+        font-size: 28px;
+      }
+
+      .chart-box,
+      .stats-box,
+      .table-box {
+        padding: 16px;
+      }
+
+      .chart-box canvas {
+        height: 260px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <div class="hero-top">
+        <div>
+          <h1>中正會館｜營運儀表板</h1>
+          <p>儀禮科技股份有限公司</p>
+        </div>
+        <div class="hero-tag" id="lastUpdated">資料狀態：讀取中</div>
+      </div>
+    </section>
+
+    <section class="panel filters">
+      <div class="field">
+        <label for="startDate">開始日期</label>
+        <input type="date" id="startDate" />
+      </div>
+      <div class="field">
+        <label for="endDate">結束日期</label>
+        <input type="date" id="endDate" />
+      </div>
+      <div class="field">
+        <label for="rangePreset">快速區間</label>
+        <select id="rangePreset">
+          <option value="all">全部資料</option>
+          <option value="7">近 7 天</option>
+          <option value="30">近 30 天</option>
+          <option value="90">近 90 天</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>&nbsp;</label>
+        <button class="btn" id="applyBtn">套用區間</button>
+      </div>
+    </section>
+
+    <div class="summary-title">
+      <h2 id="overviewTitle">營運概況</h2>
+      <span id="overviewSub">依選定區間顯示</span>
+    </div>
+
+    <section class="cards">
+      <div class="panel card">
+        <div class="label">最新可用間數</div>
+        <div class="value" id="availableRooms">-</div>
+        <div class="desc">總間數 - 停用間數 - 已使用間數</div>
+      </div>
+      <div class="panel card">
+        <div class="label">最新使用率</div>
+        <div class="value" id="usageRate">-</div>
+        <div class="desc">已使用間數 ÷ 可營運間數</div>
+      </div>
+      <div class="panel card">
+        <div class="label">區間新增預約</div>
+        <div class="value" id="newBookings">-</div>
+        <div class="desc">選定區間累計</div>
+      </div>
+      <div class="panel card">
+        <div class="label">區間完成使用</div>
+        <div class="value" id="completedCount">-</div>
+        <div class="desc">選定區間累計</div>
+      </div>
+    </section>
+
+    <section class="main-grid">
+      <div class="panel chart-box">
+        <h3 class="section-title">使用率趨勢</h3>
+        <div class="footer-note">依日期顯示使用率變化</div>
+        <canvas id="usageChart"></canvas>
+      </div>
+
+      <div class="panel stats-box">
+        <h3 class="section-title">區間統計</h3>
+        <div class="stats-list">
+          <div class="stat-row">
+            <div class="name">平均使用率</div>
+            <div class="num" id="avgUsage">-</div>
+          </div>
+          <div class="stat-row">
+            <div class="name">最高使用率</div>
+            <div class="num" id="maxUsage">-</div>
+          </div>
+          <div class="stat-row">
+            <div class="name">平均可用間數</div>
+            <div class="num" id="avgAvailable">-</div>
+          </div>
+          <div class="stat-row">
+            <div class="name">最新總間數</div>
+            <div class="num" id="latestTotalRooms">-</div>
+          </div>
+          <div class="stat-row">
+            <div class="name">最新停用間數</div>
+            <div class="num" id="latestStoppedRooms">-</div>
+          </div>
+          <div class="stat-row">
+            <div class="name">最新已使用間數</div>
+            <div class="num" id="latestUsedRooms">-</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel table-box">
+      <h3 class="section-title">每日營運明細</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>日期</th>
+              <th>總間數</th>
+              <th>停用間數</th>
+              <th>已使用間數</th>
+              <th>新增預約</th>
+              <th>完成使用</th>
+              <th>可用間數</th>
+              <th>使用率</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            <tr>
+              <td colspan="8" class="empty">資料讀取中...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="footer-note" id="dataCount">-</div>
+    </section>
+  </div>
+
+  <script>
+    const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vToD9FjNPIYBMNRIs0XBUe5dEqoDJ22nUYA-v2_bdkLEKg-IjjA8FwxeyYREvxS9JNBQryJx_trVLWF/pub?gid=1750153528&single=true&output=csv';
+
+    let allData = [];
+    let filteredData = [];
+
+    const el = (id) => document.getElementById(id);
+
+    function toNumber(value) {
+      if (value === null || value === undefined) return 0;
+      const cleaned = String(value).replace(/,/g, '').replace(/%/g, '').trim();
+      if (cleaned === '') return 0;
+      const num = Number(cleaned);
+      return Number.isFinite(num) ? num : 0;
+    }
+
+    function formatDate(input) {
+      const d = new Date(input);
+      if (Number.isNaN(d.getTime())) return '';
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    }
+
+    function formatPercent(num) {
+      if (!Number.isFinite(num)) return '-';
+      return `${(num * 100).toFixed(1)}%`;
+    }
+
+    function parseCSV(text) {
+      const cleanText = text.replace(/^\uFEFF/, '');
+      const rows = [];
+      let row = [];
+      let cell = '';
+      let inQuotes = false;
+
+      for (let i = 0; i < cleanText.length; i++) {
+        const char = cleanText[i];
+        const next = cleanText[i + 1];
+
+        if (char === '"') {
+          if (inQuotes && next === '"') {
+            cell += '"';
+            i++;
+          } else {
+            inQuotes = !inQuotes;
+          }
+        } else if (char === ',' && !inQuotes) {
+          row.push(cell);
+          cell = '';
+        } else if ((char === '\n' || char === '\r') && !inQuotes) {
+          if (char === '\r' && next === '\n') i++;
+          row.push(cell);
+          if (row.some(col => String(col).trim() !== '')) rows.push(row);
+          row = [];
+          cell = '';
+        } else {
+          cell += char;
+        }
+      }
+
+      if (cell.length > 0 || row.length > 0) {
+        row.push(cell);
+        if (row.some(col => String(col).trim() !== '')) rows.push(row);
+      }
+
+      if (!rows.length) return [];
+
+      const headers = rows[0].map(h => String(h).trim());
+      return rows.slice(1).map(cols => {
+        const obj = {};
+        headers.forEach((header, index) => {
+          obj[header] = String(cols[index] || '').trim();
+        });
+        return obj;
+      });
+    }
+
+    function normalizeData(rows) {
+      return rows
+        .map(item => {
+          const dateText = item['日期'];
+          const dateObj = new Date(dateText);
+          if (!dateText || Number.isNaN(dateObj.getTime())) return null;
+
+          const totalRooms = toNumber(item['總間數']);
+          const stoppedRooms = toNumber(item['停用間數']);
+          const usedRooms = toNumber(item['已使用間數']);
+          const newBookings = toNumber(item['新增預約']);
+          const completedUse = toNumber(item['完成使用']);
+
+          const rawAvailable = item['可用間數'];
+          const rawUsageRate = item['使用率'];
+
+          let availableRooms;
+          if (rawAvailable === undefined || rawAvailable === null || String(rawAvailable).trim() === '') {
+            availableRooms = totalRooms - stoppedRooms - usedRooms;
+          } else {
+            availableRooms = toNumber(rawAvailable);
+          }
+
+          let usageRate;
+          if (rawUsageRate === undefined || rawUsageRate === null || String(rawUsageRate).trim() === '') {
+            const operatingRooms = totalRooms - stoppedRooms;
+            usageRate = operatingRooms > 0 ? usedRooms / operatingRooms : 0;
+          } else if (String(rawUsageRate).includes('%')) {
+            usageRate = toNumber(rawUsageRate) / 100;
+          } else {
+            const rawNumber = Number(String(rawUsageRate).trim());
+            usageRate = rawNumber > 1 ? rawNumber / 100 : rawNumber;
+          }
+
+          if (!Number.isFinite(usageRate)) usageRate = 0;
+
+          return {
+            日期: formatDate(dateObj),
+            總間數: totalRooms,
+            停用間數: stoppedRooms,
+            已使用間數: usedRooms,
+            新增預約: newBookings,
+            完成使用: completedUse,
+            可用間數: availableRooms,
+            使用率: usageRate
+          };
+        })
+        .filter(Boolean)
+        .sort((a, b) => new Date(a['日期']) - new Date(b['日期']));
+    }
+
+    function setDefaultDateRange() {
+      if (!allData.length) return;
+      const lastDate = allData[allData.length - 1]['日期'];
+      const end = new Date(lastDate);
+      const start = new Date(end);
+      start.setDate(start.getDate() - 29);
+
+      el('startDate').value = formatDate(start);
+      el('endDate').value = formatDate(end);
+      el('rangePreset').value = '30';
+    }
+
+    function applyPresetRange(days) {
+      if (!allData.length) return;
+
+      if (days === 'all') {
+        el('startDate').value = allData[0]['日期'];
+        el('endDate').value = allData[allData.length - 1]['日期'];
+        return;
+      }
+
+      const lastDate = allData[allData.length - 1]['日期'];
+      const end = new Date(lastDate);
+      const start = new Date(end);
+      start.setDate(start.getDate() - (Number(days) - 1));
+
+      el('startDate').value = formatDate(start);
+      el('endDate').value = formatDate(end);
+    }
+
+    function filterData() {
+      const startDate = el('startDate').value;
+      const endDate = el('endDate').value;
+
+      filteredData = allData.filter(item => {
+        const d = item['日期'];
+        if (startDate && d < startDate) return false;
+        if (endDate && d > endDate) return false;
+        return true;
+      });
+
+      renderDashboard();
+    }
+
+    function renderDashboard() {
+      if (!filteredData.length) {
+        el('overviewTitle').textContent = '營運概況';
+        el('overviewSub').textContent = '這個區間沒有資料';
+        el('availableRooms').textContent = '-';
+        el('usageRate').textContent = '-';
+        el('newBookings').textContent = '-';
+        el('completedCount').textContent = '-';
+        el('avgUsage').textContent = '-';
+        el('maxUsage').textContent = '-';
+        el('avgAvailable').textContent = '-';
+        el('latestTotalRooms').textContent = '-';
+        el('latestStoppedRooms').textContent = '-';
+        el('latestUsedRooms').textContent = '-';
+        el('dataCount').textContent = '共 0 筆資料';
+        el('tableBody').innerHTML = '<tr><td colspan="8" class="empty">這個區間沒有資料</td></tr>';
+        drawChart([]);
+        return;
+      }
+
+      const latest = filteredData[filteredData.length - 1];
+      const totalBookings = filteredData.reduce((sum, item) => sum + item['新增預約'], 0);
+      const totalCompleted = filteredData.reduce((sum, item) => sum + item['完成使用'], 0);
+      const avgUsage = filteredData.reduce((sum, item) => sum + item['使用率'], 0) / filteredData.length;
+      const maxUsage = Math.max(...filteredData.map(item => item['使用率']));
+      const avgAvailable = filteredData.reduce((sum, item) => sum + item['可用間數'], 0) / filteredData.length;
+
+      const firstDate = filteredData[0]['日期'];
+      const lastDate = filteredData[filteredData.length - 1]['日期'];
+
+      el('overviewTitle').textContent = `營運概況｜${lastDate}`;
+      el('overviewSub').textContent = firstDate === lastDate ? `單日資料：${lastDate}` : `區間：${firstDate} ～ ${lastDate}`;
+
+      el('availableRooms').textContent = latest['可用間數'];
+      el('usageRate').textContent = formatPercent(latest['使用率']);
+      el('newBookings').textContent = totalBookings;
+      el('completedCount').textContent = totalCompleted;
+
+      el('avgUsage').textContent = formatPercent(avgUsage);
+      el('maxUsage').textContent = formatPercent(maxUsage);
+      el('avgAvailable').textContent = avgAvailable.toFixed(1);
+      el('latestTotalRooms').textContent = latest['總間數'];
+      el('latestStoppedRooms').textContent = latest['停用間數'];
+      el('latestUsedRooms').textContent = latest['已使用間數'];
+
+      el('dataCount').textContent = `共 ${filteredData.length} 筆資料`;
+
+      el('tableBody').innerHTML = filteredData
+        .slice()
+        .reverse()
+        .map(item => `
+          <tr>
+            <td>${item['日期']}</td>
+            <td>${item['總間數']}</td>
+            <td>${item['停用間數']}</td>
+            <td>${item['已使用間數']}</td>
+            <td>${item['新增預約']}</td>
+            <td>${item['完成使用']}</td>
+            <td>${item['可用間數']}</td>
+            <td>${formatPercent(item['使用率'])}</td>
+          </tr>
+        `)
+        .join('');
+
+      drawChart(filteredData);
+    }
+
+    function drawChart(data) {
+      const canvas = el('usageChart');
+      const ctx = canvas.getContext('2d');
+
+      const rect = canvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.scale(dpr, dpr);
+      ctx.clearRect(0, 0, rect.width, rect.height);
+
+      if (!data.length) return;
+
+      const padding = { top: 24, right: 18, bottom: 42, left: 42 };
+      const chartW = rect.width - padding.left - padding.right;
+      const chartH = rect.height - padding.top - padding.bottom;
+      const values = data.map(d => d['使用率']);
+      const labels = data.map(d => d['日期'].slice(5));
+      const maxValue = Math.max(1, Math.max(...values) * 1.1);
+
+      ctx.strokeStyle = 'rgba(124, 96, 78, 0.16)';
+      ctx.lineWidth = 1;
+      ctx.font = '12px sans-serif';
+      ctx.fillStyle = '#6f5d52';
+
+      for (let i = 0; i <= 5; i++) {
+        const y = padding.top + (chartH / 5) * i;
+        ctx.beginPath();
+        ctx.moveTo(padding.left, y);
+        ctx.lineTo(padding.left + chartW, y);
+        ctx.stroke();
+
+        const value = maxValue - (maxValue / 5) * i;
+        ctx.fillText(`${(value * 100).toFixed(0)}%`, 4, y + 4);
+      }
+
+      if (data.length === 1) {
+        const x = padding.left + chartW / 2;
+        const y = padding.top + chartH - (values[0] / maxValue) * chartH;
+
+        ctx.beginPath();
+        ctx.arc(x, y, 6, 0, Math.PI * 2);
+        ctx.fillStyle = '#7c604e';
+        ctx.fill();
+
+        ctx.fillStyle = '#6f5d52';
+        ctx.fillText(labels[0], x - 18, rect.height - 14);
+        ctx.fillText(formatPercent(values[0]), x - 20, y - 14);
+        return;
+      }
+
+      const points = values.map((value, index) => {
+        const x = padding.left + (chartW / (values.length - 1)) * index;
+        const y = padding.top + chartH - (value / maxValue) * chartH;
+        return { x, y, value, label: labels[index] };
+      });
+
+      ctx.beginPath();
+      points.forEach((p, i) => {
+        if (i === 0) ctx.moveTo(p.x, p.y);
+        else ctx.lineTo(p.x, p.y);
+      });
+      ctx.strokeStyle = '#7c604e';
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      ctx.lineTo(points[points.length - 1].x, padding.top + chartH);
+      ctx.lineTo(points[0].x, padding.top + chartH);
+      ctx.closePath();
+      ctx.fillStyle = 'rgba(124, 96, 78, 0.10)';
+      ctx.fill();
+
+      const labelStep = Math.max(1, Math.ceil(points.length / 6));
+
+      points.forEach((p, i) => {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 4.5, 0, Math.PI * 2);
+        ctx.fillStyle = '#7c604e';
+        ctx.fill();
+
+        if (i % labelStep === 0 || i === points.length - 1) {
+          ctx.fillStyle = '#6f5d52';
+          ctx.fillText(p.label, p.x - 14, rect.height - 14);
+        }
+      });
+    }
+
+    async function loadData() {
+      try {
+        const res = await fetch(CSV_URL, { cache: 'no-store' });
+        if (!res.ok) throw new Error('CSV 讀取失敗');
+
+        const text = await res.text();
+        const raw = parseCSV(text);
+        allData = normalizeData(raw);
+
+        if (!allData.length) {
+          throw new Error('找不到有效資料，請確認欄位名稱是否正確');
+        }
+
+        setDefaultDateRange();
+        filterData();
+        el('lastUpdated').textContent = `資料筆數：${allData.length} 筆`;
+      } catch (error) {
+        console.error(error);
+        el('lastUpdated').textContent = '資料狀態：讀取失敗';
+        el('overviewTitle').textContent = '資料讀取失敗';
+        el('overviewSub').textContent = error.message;
+        el('tableBody').innerHTML = `<tr><td colspan="8" class="empty">${error.message}</td></tr>`;
+        drawChart([]);
+      }
+    }
+
+    el('rangePreset').addEventListener('change', (e) => {
+      applyPresetRange(e.target.value);
+    });
+
+    el('applyBtn').addEventListener('click', filterData);
+
+    window.addEventListener('resize', () => {
+      drawChart(filteredData);
+    });
+
+    loadData();
+  </script>
+</body>
+</html>
